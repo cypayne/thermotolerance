@@ -8,9 +8,9 @@ library("GSEABase")
 library("biomaRt")
 
 ## TT brain
-brain_22c<-read.csv(file="input_files/TT-brain-22c-w-mito_DGE_lfc-shr_all.csv",head=TRUE)
-brain_33c<-read.csv(file="input_files/TT-brain-33c-w-mito_DGE_lfc-shr_all.csv",head=TRUE)
-brain_33cV22c<-read.csv(file="input_files/TT-brain-33cV22c-w-mito_DGE_lfc-shr_all.csv",head=TRUE)
+brain_22c<-read.csv(file="Scripts/input_files/TT-brain-22c-w-mito_DGE_lfc-shr_all.csv",head=TRUE)
+brain_33c<-read.csv(file="Scripts/input_files/TT-brain-33c-w-mito_DGE_lfc-shr_all.csv",head=TRUE)
+brain_33cV22c<-read.csv(file="Scripts/input_files/TT-brain-33cV22c-w-mito_DGE_lfc-shr_all.csv",head=TRUE)
 
 ## TT liver
 liver_22c<-read.csv(file="input_files/TT-liver-22c-w-mito_DGE_lfc-shr_all.csv",head=TRUE)
@@ -24,14 +24,14 @@ mart <- useMart(biomart = "ensembl", dataset = "xmaculatus_gene_ensembl", host="
 #attributes[1:50,]
 
 # match go ids to ensembl gene ids
-results <- getBM(attributes = c("go_id","external_gene_name","ensembl_gene_id","kegg_enzyme"), filters=c("ensembl_gene_id"),values=dgeres$Gene, mart = mart)
+results <- getBM(attributes = c("go_id","external_gene_name","ensembl_gene_id"), filters=c("ensembl_gene_id"),values=dgeres$Gene, mart = mart)
 
 # subset gene universe to only include genes with valid go ids and external gene names
 gene_universe<-subset(results,nchar(results$go_id)>0 & nchar(results$external_gene_name) > 0)
 gene_universe$ensembl_id<-gene_universe[,3]
 gene_universe[,3]<-as.numeric(as.factor(gene_universe[,3]))
 gene_universe$Evidence<-rep("ISA",length(gene_universe[,3]))
-colnames(gene_universe)<-c("frame.go_id","frame.gene_name","frame.gene_id","frame.KEGG","frame.ensembl","frame.Evidence")
+colnames(gene_universe)<-c("frame.go_id","frame.gene_name","frame.gene_id","frame.ensembl","frame.Evidence")
 
 goframeData <- data.frame(gene_universe$frame.go_id,gene_universe$frame.Evidence,gene_universe$frame.gene_id)
 
@@ -44,34 +44,35 @@ universe <- goframeData$gene_universe.frame.gene_id
 ## GO enrichment
 
 ## brain
+sig_thresh <- 0.1
 # if 22c birVmal
-dgesig <- subset(dgeres,padj_res.22CbirVmal < 0.1) # 2536
+dgesig <- subset(dgeres,padj_res.22CbirVmal < sig_thresh) # 0.1 = 2536
 # if 33c birVmal
-dgesig <- subset(dgeres,padj_res.33CbirVmal < 0.1) # 2422
+dgesig <- subset(dgeres,padj_res.33CbirVmal < sig_thresh) # 0.1 = 2422
 # if 33cV22c F1
-dgesig <- subset(dgeres, padj_res.F133cV22c < 0.1) # 1833
+dgesig <- subset(dgeres, padj_res.F133cV22c < sig_thresh) # 0.1 = 1833
 # if 33cV22c bir
-dgesig <- subset(dgeres, padj_res.bir33cV22c < 0.1) # 758
+dgesig <- subset(dgeres, padj_res.bir33cV22c < sig_thresh) # 0.1 = 758, 0.05 = 515
 # if 33cV22c mal
-dgesig <- subset(dgeres, padj_res.mal33cV22c < 0.1) # 763
+dgesig <- subset(dgeres, padj_res.mal33cV22c < sig_thresh) # 0.1 = 763, 0.05 = 541
 dim(dgesig)
-  
+
 # ## TT: subset padj < 0.1
 # # brain bir 33c v 22c
 # dim(bir) # 19106
 # dgesig <- subset(bir, padj < 0.1)
 # dim(dgesig) # 759
-# 
+#
 # # brain mal 33c v 22c
 # dim(mal) # 19106
 # dgesig <- subset(mal, padj < 0.1)
 # dim(dgesig) # 775
-# 
+#
 # # liver bir 33c v 22c
 # dim(bir) # 19106
 # dgesig <- subset(bir, padj < 0.1)
 # dim(dgesig) # 72
-# 
+#
 # # liver mal 33c v 22c
 # dim(mal) # 19106
 # dgesig <- subset(mal, padj < 0.1)
@@ -97,14 +98,14 @@ write.csv(gene2go_matchup_33cV22c_brain,'./TT-brain-33cV22c-w-mito_DGE_lfc-shr_p
 # set params for hyperGTest
 # testDirection = "over" for overrepresented genes, = "under" for underrepresented
 # interested in overrep genes
-# three categories: 
+# three categories:
 #   cellular component (CC; where gene products are active)
-#   molecular function (MF; the biological function of gene or gene product) 
+#   molecular function (MF; the biological function of gene or gene product)
 #   biological process (BP; pathways or larger processes that multiple gene products involved in).
-# Output: 
-# ExpCount is the expected count and the Count is how many instances of that term were actually oberved 
-# in your gene list while the Size is the number that could have been found in your gene list if every 
-# instance had turned up. Values like the ExpCount and the Size are going to be affected by what is included 
+# Output:
+# ExpCount is the expected count and the Count is how many instances of that term were actually oberved
+# in your gene list while the Size is the number that could have been found in your gene list if every
+# instance had turned up. Values like the ExpCount and the Size are going to be affected by what is included
 # in the gene universe as well as by whether or not it was a conditional test.
 params <- GSEAGOHyperGParams(name="Xiphophorus maculatus genes",
                               geneSetCollection=gsc,
@@ -121,7 +122,7 @@ results_OverBP<-summary(OverBP)
 ## Output an additional column with the genes falling under each GO category
 # FOR BP
 res_GOBPID <- results_OverBP$GOBPID # for BP
-cats <- geneIdsByCategory(OverBP) 
+cats <- geneIdsByCategory(OverBP)
 # get list of lists: all geneids per GOBPID
 extract_geneids <- sapply(res_GOBPID, function(go) cats[[go]])
 # this gives dataframe of two columns: GOBPID, and the list of gene ids falling under it
@@ -137,7 +138,7 @@ write.table(go_output,'./TT-brain-33cV22c-w-mito_DGE_lfc-shr_pval0.05_33cV22cMal
 
 # FOR CC
 res_GOCCID <- results_OverBP$GOCCID # for CC
-cats <- geneIdsByCategory(OverBP) 
+cats <- geneIdsByCategory(OverBP)
 # get list of lists: all geneids per GOBPID
 extract_geneids <- sapply(res_GOCCID, function(go) cats[[go]])
 # this gives dataframe of two columns: GOBPID, and the list of gene ids falling under it

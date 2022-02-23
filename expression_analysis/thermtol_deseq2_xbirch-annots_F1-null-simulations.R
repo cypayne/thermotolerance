@@ -1,9 +1,12 @@
-## DESeq2 DGE of TT fish, pseudoaligned against Xbirchmanni gtf reference
-## updated I-2020
+## DESeq2 DGE of simulated F1 expression, generated from
+## parental expression, where reads were pseudoaligned against
+## Xbirchmanni gtf reference
+## note that xbirch and xmal abundance files are real, observed values from
+## kallisto while F1 abundance files are simulated
+## see Scripts/expression_analysis/simulate_null_F1_expression.R
+## updated I-2022
 
-## you can work with a multi-group design in two ways
-## 1. subset each temp group at a time, run ~species
-## 2. use interaction term: ~ temp+species+species:temp
+setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/")
 
 library(tximportData)
 library(tximport)
@@ -12,11 +15,11 @@ library(readr)
 library(DESeq2)
 
 # specify tissue: "brain" or "liver"
-tissue <- "brain"
+tissue <- "liver"
 
 ## Read in sample files
-dir <- "Scripts/input_files/kallisto_output/"
-samples <- read.table(file.path(dir, "TT_samples.txt"), header = TRUE)
+dir <- "Data/kallisto_output/simulatedF1_kallisto_posttrim_xbirch-inferred-txtome"
+samples <- read.table(file.path(dir, "TT_samples_simulated-F1.txt"), header = TRUE)
 
 # make sure that non-continuous variables are cast as factors
 samples$temp <- factor(samples$temp)
@@ -27,7 +30,7 @@ samples <- samples[samples$tissue == tissue, ]
 
 samples
 
-files <- file.path(dir, "kallisto_posttrim_xbirch-inferred-txtome", paste(samples$file_basename,"kallisto",sep="_"), "abundance.h5")
+files <- file.path(dir, paste(samples$file_basename,"kallisto",sep="_"), "abundance.tsv")
 names(files) <- paste0(samples$sample)
 files
 
@@ -57,29 +60,29 @@ dds$temp <- relevel(dds$temp, ref = "22.5")
 
 # Determine best fit
 # by plotting or quantitatively with median absolute residual (smaller = better)
-# local: 0.0872
+# local: brain=0.0230, liver=0.0938
 dds <- DESeq(dds, fitType="local")
 plotDispEsts(dds, main="Dispersion plot with local fit")
 residual <- mcols(dds)$dispGeneEst - mcols(dds)$dispFit
 absres<-abs(residual)
 summary(absres)
-# vs parametric: 0.1233
+# vs parametric: brain=0.0300, liver=0.1278
 dds <- DESeq(dds, fitType="parametric")
 plotDispEsts(dds, main="Dispersion plot with parametric fit")
 residual <- mcols(dds)$dispGeneEst - mcols(dds)$dispFit
 absres<-abs(residual)
 summary(absres)
 
-# chose local
+# chose local for consistency with real F1 expression analysis (since close enough)
 dds <- DESeq(dds, fitType="local")
 resultsNames(dds)
 
 # save dds object
-saveRDS(dds, "input_files/TT-brain-xbirch-gtf_dds.rds")
+saveRDS(dds, file.path(dir, paste("TT-",tissue,"-xbirch-gtf_nullF1_dds.rds", sep="")))
 
 # save vst object
 vst <- vst(dds)
-saveRDS(vst, "input_files/TT-brain-xbirch-gtf_vst.rds")
+saveRDS(vst, file.path(dir,paste("TT-",tissue,"-xbirch-gtf_vst.rds", sep="")))
 
 # get temperature-dependent comparisons per species
 res.mal33cV22c <- lfcShrink(dds, coef="temp_33.5_vs_22.5", type="ashr")
@@ -112,7 +115,7 @@ res_list <- lapply(ls(pattern = "^res\\."), get)
 names(res_list)<- (ls(pattern = "^res\\."))
 names(res_list)
 #XXX
-of_header   <- "TT-brain-33c-xbirch-gtf_"
+of_header   <- paste("nullF1_TT-",tissue,"-xbirch-gtf_",sep="")
 # loop through all results objects, output to csv files
 for (i in 1:length(res_list)) {
 
@@ -125,7 +128,7 @@ for (i in 1:length(res_list)) {
   # rename first column
   names(res_out)[1] <- "Gene"
   # output this to unique file
-  write.csv(res_out, file = paste0(of_header,"DGE_lfc-shr_",names(res_list[i]), ".csv", sep = ""))
+  write.csv(res_out, file = file.path(dir,paste(of_header,"DGE_lfc-shr_",names(res_list[i]), ".csv", sep = "")))
 
   ## Create output file with LFC and padj values from all created res. objects
   # grab only LFC and padj columns from results object (with relevant gene names as row.names)
@@ -148,4 +151,4 @@ resdata.shr
 # merge results values with the normalized counts data for all samples
 resdata.shr <- merge(resdata.shr, as.data.frame(counts(dds, normalized=TRUE)), by="row.names", sort=FALSE)
 names(resdata.shr)[1] <- "Gene"
-write.csv(resdata.shr, file=paste(of_header,"DGE_lfc-shr_all.csv",sep=""))
+write.csv(resdata.shr, file=file.path(dir,paste(of_header,"DGE_lfc-shr_all.csv",sep="")))
