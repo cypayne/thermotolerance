@@ -1,12 +1,12 @@
 ### CTmax-Rqtl-analysis_clean.R
-# 
-# Script used to map CTmax QTL in Payne et al 2021 
 #
-# Input file: 
-#   Rqtl format csv file, containing phenotype columns 
+# Script used to map CTmax QTL in Payne et al 2021
+#
+# Input file:
+#   Rqtl format csv file, containing phenotype columns
 #   followed by marker genotype columns. Each row represents
 #   one sample.
-#   Genotypes are as follows: 
+#   Genotypes are as follows:
 #     AA = homozygous X. malinche
 #     BB = homozygous X. birchmanii
 #     AB = heterozygote
@@ -21,7 +21,7 @@ library(qtl)
 
 setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/LTREB_qtl/CTmax-QTL_first-scan_data")
 
-###### LOAD DATA ######  
+###### LOAD DATA ######
 
 ## load rqtl infile (csv) = 30244 (20k bp thinned) markers, 152 individuals, 31 phenotypes
 # for the 1st QTL scan
@@ -32,10 +32,10 @@ data<-read.cross("csv",dir="","LTREB-CTmax-oct2020-ONLY_20k-thinned-genos_no-xtr
 # check that cross type, # individuals, and # markers are correct
 # 30244 (20k bp thinned) markers, 152 individuals, 31 phenotypes
 # 93% genoytped, 100% phenotyped
-summary(data) 
+summary(data)
 
 
-###### REMOVE INDVS & MARKERS WITH EXCESS MISSING DATA ######  
+###### REMOVE INDVS & MARKERS WITH EXCESS MISSING DATA ######
 
 ## plot: visualize missing data patterns in data
 par(mfrow=c(1,2), las=1)
@@ -96,7 +96,7 @@ for(i in 1:3) plot(gfreq[i,], ylab="Genotype frequency", main=c("AA", "AB", "BB"
 ###### ESTIMATE RECOMBINATION ######
 
 ## estimate recombination between each pair of markers, calculate LOD for test of rec. freq. = 1/2
-# Note: this operation requires high memory and time allocation, recommend running on a cluster/server, 
+# Note: this operation requires high memory and time allocation, recommend running on a cluster/server,
 #       after figuring out the above parameters
 data_sub.ds <- est.rf(data_sub.ds)
 
@@ -113,7 +113,7 @@ data_sub.ds <- readRDS(file = "./ltreb-qtl-data_sub.ds-est.rf.rds")
 data_prob <- calc.genoprob(data_sub.ds)
 
 # 1st scan
-write.cross(data_prob,file="ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob.csv") 
+write.cross(data_prob,file="ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob.csv")
 # 2nd scan
 #write.cross(data_prob,file="ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob_second-scan-w-qtl-covariate.csv")
 
@@ -173,16 +173,16 @@ selectedMod <- step(model_all)
 summary(model_all)
 
 # pull selected covariates (plus hybrid_index)
-#  ctmax ~ hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-#  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+#  ctmax ~ hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+#  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
 #  STM.6 + STM.7
 covariates <- pull.pheno(data_prob, c("hybrid_index","STH.1","STH.2","STH.3","STH.4","STH.7","STH.8","STL.1","STL.2","STL.4","STL.5","STL.6","STL.7","STM.2",
                                       "STM.4","STM.5","STM.6","STM.7"))
 
 # 2nd scan
 geno <- as.factor(pull.geno(data_prob, "ScyDAA6-2113-HRSCAF-2539:8811359"))
-summary(lm(ctmax ~ geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+summary(lm(ctmax ~ geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
              STM.6 + STM.7))
 # pull selected covariates
 covariates <- pull.pheno(data_prob, c("hybrid_index","STH.1","STH.2","STH.3","STH.4","STH.7","STH.8","STL.1","STL.2","STL.4","STL.5","STL.6","STL.7","STM.2",
@@ -211,11 +211,10 @@ summary(perm.hk,alpha=c(0.05, 0.1, 0.2))
 #5%  4.72
 #10% 4.33
 #20% 3.95
-#1.5interval=4.37-1.5
-cutoff_lod = 4.33 
+cutoff_lod = 4.33
 
 ## 2nd scan: ctmax ~ hi + sig.site.tanks + g22_qtl_genos
-#cutoff_lod = 4.37 
+#cutoff_lod = 4.37
 
 ## look at highest LOD peak and the corresponding p-value on each chromosome
 summary(scanone.hk, perms=perm.hk, pvalues=TRUE)
@@ -329,7 +328,7 @@ dev.off()
 
 
 
-### other effect plots                            
+### other effect plots
 ## Load data_prob object
 data_prob <- readRDS("ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob.rds")
 
@@ -389,7 +388,7 @@ eff
 #  BB: 36.00340, 0.1713042
 
 ## plot estimated QTL effects along chr22 (shows additive and dominance effects)
-# effect summary for 22@8.81: 
+# effect summary for 22@8.81:
 # a           d             se.a        se.d
 # 0.008494465	-0.337265149	0.124726314	0.172637572
 effect_table<-effectscan(data_sim, pheno.col="ctmax", c("ScyDAA6-2113-HRSCAF-2539"), draw=F, get.se=T)
@@ -423,7 +422,7 @@ summary(out.fqi)
 addint(data_prob, qtl=qtl, method="hk")
 
 # refine the qtl positions
-# each QTL is moved to the position giving the highest likelihood, 
+# each QTL is moved to the position giving the highest likelihood,
 # and the entire process is repeated until no further improvement in likelihood can be obtained
 rqtl <- refineqtl(data_prob, qtl=qtl, method="hk")
 rqtl
@@ -499,17 +498,17 @@ dp_noNA[dp_noNA == '-']<-NA
 dp_noNA<-na.omit(dp_noNA)
 dim(dp_noNA)
 
-## perform a linear regression with the full model and get the R^2 value 
+## perform a linear regression with the full model and get the R^2 value
 # full model adjusted R^2: 0.6731 (pval < 2e-16)
-lm.res<-lm(ctmax ~ chr22_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+lm.res<-lm(ctmax ~ chr22_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
              STM.6 + STM.7,data=dp_noNA)
 summary(lm.res)
 
 ## get the adjusted R^2 from the null model (i.e. without genotype as a coefficient)
 # null adj R^2: 0.6289 (pval < 2e-16)
-null.lm.res<-lm(ctmax ~ hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+null.lm.res<-lm(ctmax ~ hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
                   STM.6 + STM.7,data=dp_noNA)
 summary(null.lm.res)
 
@@ -520,26 +519,26 @@ effect = 0.6731 - 0.6289 # 0.0442 (4.42%)
 ## get log likelihood difference between focal and null models
 summary(lm.res)
 model2<-glm(as.numeric(ctmax)~as.numeric(hi)+
-              as.factor(STH.1) + as.factor(STH.2) + as.factor(STH.3) + 
-              as.factor(STH.4) + as.factor(STH.7) + as.factor(STH.8) + 
-              as.factor(STL.1) + as.factor(STL.2) + as.factor(STL.4) + 
-              as.factor(STL.5) + as.factor(STL.6) + as.factor(STL.7) + 
-              as.factor(STM.2) + as.factor(STM.4) + as.factor(STM.5) + 
+              as.factor(STH.1) + as.factor(STH.2) + as.factor(STH.3) +
+              as.factor(STH.4) + as.factor(STH.7) + as.factor(STH.8) +
+              as.factor(STL.1) + as.factor(STL.2) + as.factor(STL.4) +
+              as.factor(STL.5) + as.factor(STL.6) + as.factor(STL.7) +
+              as.factor(STM.2) + as.factor(STM.4) + as.factor(STM.5) +
               as.factor(STM.6) + as.factor(STM.7),data=dp_noNA,family="gaussian")
 null<-logLik(model2)[1]
 
 model1<-glm(as.numeric(ctmax)~as.numeric(hi)+
-              as.factor(STH.1) + as.factor(STH.2) + as.factor(STH.3) + 
-              as.factor(STH.4) + as.factor(STH.7) + as.factor(STH.8) + 
-              as.factor(STL.1) + as.factor(STL.2) + as.factor(STL.4) + 
-              as.factor(STL.5) + as.factor(STL.6) + as.factor(STL.7) + 
-              as.factor(STM.2) + as.factor(STM.4) + as.factor(STM.5) + 
+              as.factor(STH.1) + as.factor(STH.2) + as.factor(STH.3) +
+              as.factor(STH.4) + as.factor(STH.7) + as.factor(STH.8) +
+              as.factor(STL.1) + as.factor(STL.2) + as.factor(STL.4) +
+              as.factor(STL.5) + as.factor(STL.6) + as.factor(STL.7) +
+              as.factor(STM.2) + as.factor(STM.4) + as.factor(STM.5) +
               as.factor(STM.6) + as.factor(STM.7) + as.factor(geno),data=dp_noNA,family="gaussian")
 focal<-logLik(model1)[1]
 
 # calculate log likelihood difference
 like_diff<-focal-null
-like_diff # 10.03532 
+like_diff # 10.03532
 
 
 ### chr15 QTL LM effect size estimate
@@ -549,15 +548,15 @@ dp_noNA[dp_noNA == '-']<-NA
 dp_noNA<-na.omit(dp_noNA)
 dim(dp_noNA)
 # full model adjusted R^2: 0.6417 (pval < 2e-16)
-lm.res<-lm(ctmax ~ chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+lm.res<-lm(ctmax ~ chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
              STM.6 + STM.7,data=dp_noNA)
 summary(lm.res)
 
 ## get the adjusted R^2 from the null model (i.e. without genotype as a coefficient)
 # null adj R^2: 0.6203 (pval < 2e-16)
-null.lm.res<-lm(ctmax ~ hi +STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+null.lm.res<-lm(ctmax ~ hi +STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
                   STM.6 + STM.7,data=dp_noNA)
 summary(null.lm.res)
 
@@ -571,15 +570,15 @@ dp_noNA[dp_noNA == '-']<-NA
 dp_noNA<-na.omit(dp_noNA)
 dim(dp_noNA)
 # full model adjusted R^2: 0.7126 (pval < 2e-16)
-lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + chr22_geno:chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + chr22_geno:chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
              STM.6 + STM.7,data=dp_noNA)
 summary(lm.res)
 
 ## get the adjusted R^2 from the null model (i.e. without genotype as a coefficient)
 # null adj R^2: 0.6306 (pval < 2e-16)
-null.lm.res<-lm(ctmax ~ hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+null.lm.res<-lm(ctmax ~ hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
                   STM.6 + STM.7,data=dp_noNA)
 summary(null.lm.res)
 
@@ -598,15 +597,15 @@ dp_noNA<-na.omit(dp_noNA)
 dim(dp_noNA)
 
 # full model adjusted R^2: 0.7126 (pval < 2e-16)
-lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + chr22_geno:chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + chr22_geno:chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
              STM.6 + STM.7,data=dp_noNA)
 summary(lm.res)
 
 ## get the adjusted R^2 from the null model (i.e. without genotype as a coefficient)
 # null adj R^2: 0.687 (pval < 2e-16)
-null.lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+null.lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+                  STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
                   STM.6 + STM.7,data=dp_noNA)
 summary(null.lm.res)
 
@@ -618,8 +617,8 @@ eta_squared(aov(ctmax ~ chr22_geno + chr15_geno + chr22_geno:chr15_geno + hi + S
 
 
 ### chr22:chr15 QTL comparison of means w anova/tukey
-lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + chr22_geno:chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 + 
-             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 + 
+lm.res<-lm(ctmax ~ chr22_geno + chr15_geno + chr22_geno:chr15_geno + hi + STH.1 + STH.2 + STH.3 + STH.4 + STH.7 + STH.8 + STL.1 +
+             STL.2 + STL.4 + STL.5 + STL.6 + STL.7 + STM.2 + STM.4 + STM.5 +
              STM.6 + STM.7,data=dp_noNA)
 anov <- aov(lm.res)
 TukeyHSD(x=anov, 'chr22_geno', conf.level=0.95)
@@ -629,7 +628,7 @@ TukeyHSD(x=anov, 'chr22_geno:chr15_geno', conf.level=0.95)
 
 ###### CREATE A NICE MANHATTAN PLOT OF GENOME-WIDE LODs ######
 
-### To generate an organized genome-wide manhattan plot, convert chromosome names to numbers using 
+### To generate an organized genome-wide manhattan plot, convert chromosome names to numbers using
 #     ./replace-chrom-name.py ./match_xmac_chroms_xbir-10x_chroms.txt <infile>
 #   in ./Scripts/
 scanone.hk.df_rename <- read.csv("ltreb-only-CTmax_17-1hot-site-tanks.scanone-hk_clean.tsv_chr-renamed.csv")
@@ -653,7 +652,7 @@ mh_plot<-function(chr_pos_lod){
   # data_trim$CHR <- as.character.factor(data_trim$CHR)
   data_trim$CHR<-data_trim$CHR
   manhattan(data_trim,genomewideline=cutoff_lod,suggestiveline=-1, cex.axis=1.5, cex.lab=4)
-  
+
   return(data_trim)
 }
 
@@ -690,7 +689,7 @@ ctmax<-pheno_data$ctmax         # CTmax
 model <- lm(ctmax~hi)
 summary(model)
 cor.test(ctmax,hi,method="pearson") # ctmax,hi: r=+0.1185137, pval=0.1472
-# plot correlation 
+# plot correlation
 pdf("CTmax-vs-genome-wide-ancestry_corr-plot.pdf",6,6)
 plot(hi,ctmax,pch = 16, cex = 1.3, col = "light grey", main = "CTmax and genome-wide X. malinche ancestry",xlab="hybrid index",ylab="CTmax (Celsius)")
 abline(34.7295,2.1980, lwd = 3, col="dark blue")
