@@ -1,4 +1,8 @@
+## Payne-et-al_TT-boxplots.R
+##
 ## Script used to plot expression boxplots in Payne et al 2021
+##
+## cyp I-2022
 
 ## xbirch reference
 brain_data <- read.csv("input_files/TT-brain-22c-xbirch-gtf_DGE_lfc-shr_all.csv",header=T)

@@ -1,6 +1,9 @@
-## KEGG pathway enrichment analysis ##
-# using DESeq2 DGE shrunken lfc and stats
-# cyp III-2020
+## TT-KEGG_analysis.R
+##
+## KEGG enrichment analysis to identify KEGG pathways enriched in expression
+## response to high temperature
+##
+## cyp III-2022
 
 library(AnnotationHub)
 library(gage)

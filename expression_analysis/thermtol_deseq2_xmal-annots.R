@@ -1,5 +1,8 @@
-## DESeq2 DGE of TT fish, pseudoaligned against Xmalinche gtf reference
-## updated II-2020
+## thermtol_deseq2_xmal-annots.R
+##
+## DESeq2 DGE of thermtol fish RNAseq, pseudoaligned against Xmalinche gtf reference
+## 
+## cyp I-2022
 
 ## you can work with a multi-group design in two ways
 ## 1. subset each temp group at a time, run ~species

@@ -1,7 +1,11 @@
+## TT-RNAseq_heatmap.R
+##
 ## For DGE heatmap visualization
-# stabilize variance across the mean with regularized log
-# transformation of counts
-# write only the sig genes from deseq analysis
+## stabilize variance across the mean with regularized log
+## transformation of counts
+## write only the sig genes from deseq analysis
+##
+## cyp I-2022
 
 library("DESeq2")
 library("genefilter")

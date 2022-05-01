@@ -1,5 +1,7 @@
-## DESeq2 DGE of TT fish, pseudoaligned against Xbirchmanni gtf reference
-## updated I-2020
+## thermtol_deseq2_xbirch-annots.R
+##
+## DESeq2 DGE of thermtol fish RNAseq, pseudoaligned against Xbirchmanni gtf reference
+## updated I-2022
 
 ## you can work with a multi-group design in two ways
 ## 1. subset each temp group at a time, run ~species
@@ -15,7 +17,7 @@ library(DESeq2)
 tissue <- "brain"
 
 ## Read in sample files
-dir <- "Scripts/input_files/kallisto_output/"
+dir <- "input_files/kallisto_output/"
 samples <- read.table(file.path(dir, "TT_samples.txt"), header = TRUE)
 
 # make sure that non-continuous variables are cast as factors
@@ -32,7 +34,7 @@ names(files) <- paste0(samples$sample)
 files
 
 ## load transcript annotations
-txdb <- makeTxDbFromGFF(file="Scripts/input_files/refs/xiphophorus_birchmanni_10x_12Sep2018_yDAA6_start-codons_formatted-for-txdb.gtf", format="gtf")
+txdb <- makeTxDbFromGFF(file="input_files/refs/xiphophorus_birchmanni_10x_12Sep2018_yDAA6_start-codons_formatted-for-txdb.gtf", format="gtf")
 
 # create tx2gene table, match transcript name to geneid
 k <- keys(txdb, keytype = "TXNAME")

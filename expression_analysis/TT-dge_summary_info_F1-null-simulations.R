@@ -1,12 +1,15 @@
+## TT-dge_summary_info_F1-null-simulations.R
+##
 ## Summary of brain and liver differential expression results (from DESeq2 anlaysis)
 ## for simulated null F1 expression data
 ## adapted from ./TT-dge_summary_info.R
 ## FDR-adjusted p-value cutoff = 0.1
-## Payne et al 2021
+##
+## cyp I-2022
 
 ### BRAIN RNAseq (X. birchmanni pseudoalignment)
 
-brain_dge_og <- read.csv("Scripts/input_files/nullF1_TT-brain-xbirch-gtf_DGE_lfc-shr_all.csv")
+brain_dge_og <- read.csv("input_files/nullF1_TT-brain-xbirch-gtf_DGE_lfc-shr_all.csv")
 # first subset by genes that are expressed in both bir and mal under both thermal contexts
 brain_dge <- subset(brain_dge_og,!is.na(padj_res.22CbirVmal) & !is.na(padj_res.33CbirVmal))
 dim(brain_dge) #22931
@@ -102,7 +105,7 @@ intersect(dge33v22_xbir_xmal_brain,f1misexp_brain) #5
 
 ### LIVER RNAseq (X. birchmanni pseudoalignment)
 
-liver_dge_og <- read.csv("Scripts/input_files/nullF1_TT-liver-xbirch-gtf_DGE_lfc-shr_all.csv")
+liver_dge_og <- read.csv("input_files/nullF1_TT-liver-xbirch-gtf_DGE_lfc-shr_all.csv")
 liver_dge <- subset(liver_dge_og,!is.na(padj_res.22CbirVmal) & !is.na(padj_res.33CbirVmal))
 dim(liver_dge) #17525
 

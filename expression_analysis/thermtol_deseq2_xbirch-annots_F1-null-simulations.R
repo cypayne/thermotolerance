@@ -1,12 +1,14 @@
-## DESeq2 DGE of simulated F1 expression, generated from
-## parental expression, where reads were pseudoaligned against
-## Xbirchmanni gtf reference
+## thermtol_deseq2_xbirch-annots_F1-null-simulations.R
+##
+## DESeq2 dif expression analysis of simulated F1 transcript counts, 
+## generated from parental transcript counts, for which reads were 
+## pseudoaligned to the Xbirchmanni reference transcriptome
 ## note that xbirch and xmal abundance files are real, observed values from
 ## kallisto while F1 abundance files are simulated
-## see Scripts/expression_analysis/simulate_null_F1_expression.R
-## updated I-2022
-
-setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/")
+##
+## see expression_analysis/simulate_null_F1_expression.R
+##
+## cyp I-2022
 
 library(tximportData)
 library(tximport)
@@ -18,7 +20,7 @@ library(DESeq2)
 tissue <- "liver"
 
 ## Read in sample files
-dir <- "Data/kallisto_output/simulatedF1_kallisto_posttrim_xbirch-inferred-txtome"
+dir <- "input_files/kallisto_output/simulatedF1_kallisto_posttrim_xbirch-inferred-txtome"
 samples <- read.table(file.path(dir, "TT_samples_simulated-F1.txt"), header = TRUE)
 
 # make sure that non-continuous variables are cast as factors
@@ -35,7 +37,7 @@ names(files) <- paste0(samples$sample)
 files
 
 ## load transcript annotations
-txdb <- makeTxDbFromGFF(file="Scripts/input_files/refs/xiphophorus_birchmanni_10x_12Sep2018_yDAA6_start-codons_formatted-for-txdb.gtf", format="gtf")
+txdb <- makeTxDbFromGFF(file="input_files/refs/xiphophorus_birchmanni_10x_12Sep2018_yDAA6_start-codons_formatted-for-txdb.gtf", format="gtf")
 
 # create tx2gene table, match transcript name to geneid
 k <- keys(txdb, keytype = "TXNAME")

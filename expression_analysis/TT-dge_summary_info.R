@@ -1,6 +1,9 @@
+## TT-dge_summary_info.R
+## 
 ## Summary of brain and liver differential expression results (from DESeq2 anlaysis)
 ## FDR-adjusted p-value cutoff = 0.1
-## Payne et al 2021
+##
+## cyp I-2022 
 
 ### BRAIN RNAseq (X. birchmanni pseudoalignment)
 

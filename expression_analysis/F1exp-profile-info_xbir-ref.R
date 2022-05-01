@@ -1,6 +1,9 @@
+## F1exp-profile-info_xbir-ref.R
+##
 ## Outputs DGE csv file with information about F1 expression profile
 ## used to find genes with significantly transgressive response in F1s
 ## input file must have lfc and padj values for both parents and F1s
+##
 ## cyp V-2020
 
 ## XXX Configuration:

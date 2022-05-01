@@ -1,6 +1,10 @@
+## TT-GO_analysis_F1-misexpression.R
+##
 ## Gene Ontology enrichment analysis: F1 misexpression in the brain
 ## takes in deseq2 dge output for all genes to build universe
 ## tests for GO pathway enrichment
+##
+## cyp I-2022
 
 library("GOstats")
 library("GSEABase")

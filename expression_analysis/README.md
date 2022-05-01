@@ -1,9 +1,22 @@
-# Scripts for differential gene expression analysis 
+# Differential gene expression analysis 
 
 These scripts were used to perform differential gene expression (DGE)
-analysis on RNAseq data from Payne et al 2021 thermal stress experiment 
+analysis on RNAseq data from Payne et al 2022 thermal stress experiment 
 on X. birchmanni, X. malinche, and F1 hybrids exposed to ambient and 
 high temperature treatments.
+
+All input files used in the following analysis can be found in input_files/ .
+
+## Dependencies
+
+R-3.6.1
+
+The following packages are required for each anlaysis (see install.R):
+* ThermTol-DESeq2, PCA ~ DESeq2, tximport, tximportData, GenomicFeatures, readr, PCAtools, ggplot2
+* RNAseq-heatmap       ~ DESeq2, genefilter, pheatmap, RColorBrewer, gplots, reshape, ggplot2
+* GO-analysis          ~ GOstats, GSEABase, biomaRt
+* KEGG-analysis        ~ AnnotationHub, gage, pathview
+* Sim-null-F1-exp      ~ truncnorm
 
 ## Contents
 
@@ -54,6 +67,18 @@ high temperature treatments.
 
   * *Description: KEGG enrichment analysis to identify KEGG pathways enriched in expression
                   response to high temperature.*
+
+* **simulate_null_F1_expression.R ** 
+  * *Description: Simulate F1 RNAseq transcript counts based on observed parental
+                  transcript counts.* 
+
+* **thermtol_deseq2_xbirch-annots_F1-null-simulations.R**
+  * *Description: Gene expression analysis of simulated F1 expression data pseudoaligned
+                  to the Xbirchmanni reference transcriptome.*
+
+* **TT-dge_summary_info_F1-null-simulations.R**
+  * *Description: Summary of brain and liver differential expression results for simulated
+                  F1 gene expression.* 
 
 ## Contact
 

@@ -1,4 +1,8 @@
+## TT-RNAseq_alltissues_PCA.R
+##
 ## Create PCA plot from RNAseq data, spanning tissues (brain and liver)
+## 
+## cyp I-2022
 
 library(tximportData)
 library(tximport)
