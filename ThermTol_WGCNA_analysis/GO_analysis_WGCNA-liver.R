@@ -1,6 +1,6 @@
-## GO_analysis_WGCNA-brain.R
+## GO_analysis_WGCNA-liver.R
 ##
-## Gene Ontology enrichment analysis of WGCNA modules in the brain
+## Gene Ontology enrichment analysis of WGCNA modules in the liver
 ## takes in DESeq2 output for all genes to build a gene universe
 ## tests for encriched GO pathways and functions among the gene set
 ## in each WGCNA module
@@ -11,10 +11,10 @@ library("GOstats")
 library("GSEABase")
 library("biomaRt")
 
-## TT brain transgressive (F1 misexpressed)
-c22<-read.csv(file="input_files/TT-brain-22c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",head=TRUE)
-dgeres<-c22 # 19143 genes total, including mito
-c33<-read.csv(file="input_files/TT-brain-33c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",head=TRUE)
+## TT liver 22 and 33
+c22<-read.csv(file="input_files/TT-liver-22c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv",head=TRUE)
+dgeres<-c22 # 19176 genes total, including 37 mito
+c33<-read.csv(file="input_files/TT-liver-33c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv",head=TRUE)
 #dgeres<-c33
 
 mart <- useMart(biomart = "ensembl", dataset = "xmaculatus_gene_ensembl", host="uswest.ensembl.org")
@@ -22,7 +22,7 @@ mart <- useMart(biomart = "ensembl", dataset = "xmaculatus_gene_ensembl", host="
 #attributes[1:50,]
 
 # match go ids to ensembl gene ids
-# c22 = 89701
+# c22 = 89880
 results <- getBM(attributes = c("go_id","external_gene_name","ensembl_gene_id","kegg_enzyme"), filters=c("ensembl_gene_id"),values=dgeres$Gene, mart = mart)
 
 # subset gene universe to only include genes with valid go ids and external gene names
@@ -38,12 +38,13 @@ goFrame <- GOFrame(goframeData,organism="Xiphophorus")
 goAllFrame <- GOAllFrame(goFrame)
 gsc <- GeneSetCollection(goAllFrame, setType = GOCollection())
 
-# c22 = 78787
+# c22 = 78960
 universe <- goframeData$gene_universe.frame.gene_id
 
 ## GO enrichment
 
-# TT brain transgressive
+## skip this for now
+# TT liver transgressive
 # to get immune genes not in misexp set: enrich for all !(misexpressed)
 notmisexp.22c <- subset(c22, is.na(sig.F1_exp_profile))
 dgesig<-notmisexp.22c
@@ -66,8 +67,10 @@ trans.high.33c<-subset(c33, F1_transgress.high.57 == 1)
 both.high <- trans.high.22c[trans.high.22c$Gene %in% trans.high.33c$Gene,]
 both.high 
 
+##
+
 #read in WGCNA module ids and match them to the gene_universe ids
-header = "TT-brain-GO-wgcna_"
+header = "TT-liver-GO-wgcna_"
 ## choose modules of interest from those with at least one sig corr, groups of interesting modules below
 #temp strongest corr: modules_of_interest = c('lightgreen','salmon','palevioletred3')
 #temp only: modules_of_interest = c('black','darkorange','palevioletred3')
@@ -77,9 +80,11 @@ header = "TT-brain-GO-wgcna_"
 #allbut1parent: modules_of_interest = c('paleturquoise','grey60')
 #justF1s: modules_of_interest = c('brown4')
 
+# load sigMEs
+
 for(module in sigMEs) {
   module <- substring(module, 3)
-  dgesig<-read.csv(file=paste0("./TT-brain-WGCNA-onehot_",module,"_genes.csv"),head=TRUE)
+  dgesig<-read.csv(file=paste0("./TT-liver-WGCNA-onehot_",module,"_genes.csv"),head=TRUE)
   genes_sig <- dgesig$x
   genes_match<-gene_universe[gene_universe$frame.ensembl %in% genes_sig,]
   genes_match_sig <- genes_match$frame.gene_id
@@ -140,7 +145,3 @@ for(module in sigMEs) {
     }
   }
 }
-
-# match sig go ids to gene nums
-#go2gene_matchup <- data.frame("GOBPID" = genes_match$frame.go_id, "GeneID" = genes_match$frame.ensembl)
-

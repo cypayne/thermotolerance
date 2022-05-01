@@ -1,6 +1,6 @@
-## ThermTol_WGCNA-brain.R
+## ThermTol_WGCNA-liver.R
 ##
-## WGCNA analysis of thermtol brain gene expression data 
+## WGCNA analysis of thermtol liver gene expression data 
 ## Hierarchical clustering of genes into modules based on 
 ## expression profile across samples, and correlation of 
 ## module expression trend with traits of interest (i.e.
@@ -30,7 +30,7 @@ library(rhdf5)
 ### Pre-process kallisto read abundance files ### 
 
 # XXX specify tissue
-tissue <- "brain"
+tissue <- "liver"
 
 # XXX specify kallisto directory
 dir <- "input_files/kallisto_output/kall2birch-posttrim-w-mito"
@@ -39,7 +39,7 @@ dir <- "input_files/kallisto_output/kall2birch-posttrim-w-mito"
 samples <- read.table("./TT_samples.txt", header = TRUE)
 
 # make sure that non-continuous variables are cast as factors
-samples$temp <- factor(samples$temp)
+samples$temp <- as.factor(samples$temp)
 samples$species<-as.factor(samples$species)
 
 # subset data by tissue of interest
@@ -107,13 +107,13 @@ resultsNames(dds)
 #vsd = getVarianceStabilizedData(dds)
 vsd <- assay(vst(dds, blind=FALSE))
 
-write.csv(vsd,"BrainTT-species.temp_vsd.csv",quote=F)
+write.csv(vsd,"LiverTT-species.temp_vsd.csv",quote=F)
 
 #add log 2 fold
 logvsd = log2(vsd)
 
 # output logvsd
-write.csv(logvsd,"BrainTT-species.temp_log2vsd.csv",quote=F)
+write.csv(logvsd,"LiverTT-species.temp_log2vsd.csv",quote=F)
 
 
 ###### Running WGCNA ######
@@ -123,7 +123,7 @@ library(WGCNA)
 options(stringsAsFactors = FALSE)
 
 # load vsd counts
-vsd <- read.csv("BrainTT-species.temp_vsd.csv",header=T)
+vsd <- read.csv("LiverTT-species.temp_vsd.csv",header=T)
 rownames(vsd) <- vsd$X
 vsd <- vsd[,-1]
 
@@ -139,7 +139,7 @@ datExpr0 = as.data.frame(t(vsd))
 # check for missing entries, weights below a threshold, 
 # and zero-variance genes, returns list of genes/samples
 # that pass these filters
-gsg = goodSamplesGenes(datExpr0, minNSamples = 17, verbose = 3)
+gsg = goodSamplesGenes(datExpr0, minNSamples = 15, verbose = 3)
 gsg$allOK
 
 if (!gsg$allOK)
@@ -156,19 +156,18 @@ if (!gsg$allOK)
 sampleTree = hclust(dist(datExpr0), method = "average");
 
 ## plot sample tree to look for outliers
-sizeGrWindow(12,9)
-par(cex = 0.6);
+par(cex = 0.6)
 par(mar = c(0,4,2,0))
 plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5, 
      cex.axis = 1.5, cex.main = 2)
 
 ## Note: 
-#S9_TSR1-22C-malxbirchF1-brain_9-C4 looks like it could be an outlier
+#S47 looks like it could be an outlier, but keeping it anyways
 
 ## Remove sample outliers by choosing height for branch cut
 
 # Plot a line to show the cutoff
-abline(h = 15, col = "red");
+#abline(h = 15, col = "red");
 # Determine cluster under the line
 clust = cutreeStatic(sampleTree, cutHeight = 15, minSize = 10)
 table(clust)
@@ -193,12 +192,13 @@ allTraits<-one_hotTraits
 allTraits<-samples[, c("sample","species","temp")]
 #rownames(allTraits)<-samples$sample
 
-expSamples = rownames(datExpr);
-traitRows = match(expSamples, allTraits$sample);
-#traitRows = data.frame(expSamples, allTraits$sample)
+expSamples = rownames(datExpr)
+traitRows = match(expSamples, allTraits$sample)
 
-datTraits = allTraits[traitRows, -1];
-rownames(datTraits) = allTraits[traitRows, 1];
+datTraits <- as.data.frame(allTraits[traitRows, -1])
+rownames(datTraits) <- allTraits$sample
+#datTraits <- allTraits[traitRows, -1]
+#rownames(datTraits) <- allTraits[traitRows, 1]
 
 ## Re-cluster samples
 sampleTree2 = hclust(dist(datExpr), method = "average")
@@ -206,17 +206,16 @@ sampleTree2 = hclust(dist(datExpr), method = "average")
 #traitColors = numbers2colors(cbind(as.factor(datTraits[,1]),as.factor(datTraits[,2])), signed = FALSE);
 traitColors = numbers2colors(cbind(as.factor(datTraits[,1]),as.factor(datTraits[,2]),as.factor(datTraits[,3]),as.factor(datTraits[,4]),as.factor(datTraits[,5])), signed = FALSE);
 # Plot the sample dendrogram and the colors underneath.
-pdf(file='TT-brain-WGCNA_sample-tree.pdf',height=7,width=9.5)
+pdf(file='TT-liver-WGCNA_sample-tree.pdf',height=7,width=9.5)
 plotDendroAndColors(sampleTree2, traitColors,
                     groupLabels = names(datTraits), 
                     main = "Sample dendrogram and trait heatmap")
 dev.off()
 
 ## Save objects for subsequent easy loading:
-save(datExpr, datTraits, file = "BrainThermalData-01-dataInput.RData") 
+save(datExpr, datTraits, file = "LiverThermalData-01-dataInput.RData") 
 
-setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/LTREB_qtl/final_rqtl-run_14I2021/LTREB-WGCNA_st07_onehot_TT-brain/")
-lnames = load(file = "BrainThermalData-01-dataInput.RData");
+lnames = load(file = "LiverThermalData-01-dataInput.RData");
 
 
 ### Choose Soft-thresholding power ###
@@ -228,7 +227,7 @@ powers = c(c(1:10), seq(from = 12, to=30, by=2))
 sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5)
 
 ## Plot the results:
-pdf(file='TT-brain-WGCNA_pickSoftThreshold.pdf',height=7,width=9.5)
+pdf(file='TT-liver-WGCNA_pickSoftThreshold.pdf',height=7,width=9.5)
 par(mfrow = c(1,2));
 cex1 = 0.9;
 
@@ -249,27 +248,27 @@ text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 
 dev.off()
 
-## Looks like 7 is the asymptoting soft-threshold
+## Choosing 12 as the asymptoting soft-threshold
 
 ### Cluster genes into modules ###
 
 ## We'll use a single block (i.e. all 19k genes in one go, use maxBlockSize=20000)
 # maxBlockSize = 20000, blockSizePenaltyPower = Inf : if maxBlockSize > total tx
 # maxBlockSize = 10000, blockSizePenaltyPower = 5 : otherwise
-net = blockwiseModules(datExpr, power = 7,
+net = blockwiseModules(datExpr, power = 12,
                        TOMType = "unsigned", minModuleSize = 20,
                        maxBlockSize = 20000, blockSizePenaltyPower = Inf,
                        reassignThreshold = 0, mergeCutHeight = 0.25,
                        numericLabels = FALSE, pamRespectsDendro = FALSE,
                        loadTOMs = FALSE,
-                       saveTOMFileBase = "TT-Brain-TOM",
+                       saveTOMFileBase = "TT-Liver-TOM",
                        verbose = 3)
 
 # Convert labels to colors for plotting
 mergedColors = labels2colors(net$colors)
 
 # Plot the dendrogram and the module colors underneath
-pdf(file='TT-brain-WGCNA_blockwiseModule-dendrogram_onehot.pdf',height=8.5,width=12)
+pdf(file='TT-liver-WGCNA_blockwiseModule-dendrogram_onehot.pdf',height=8.5,width=12)
 plotDendroAndColors(net$dendrograms[[1]], mergedColors[net$blockGenes[[1]]],
                     "Module colors",
                     dendroLabels = FALSE, hang = 0.03,
@@ -282,16 +281,16 @@ moduleColors = labels2colors(net$colors)
 MEs = net$MEs;
 geneTree = net$dendrograms[[1]];
 save(MEs, moduleLabels, moduleColors, geneTree, 
-     file = "BrainThermal-02-networkConstruction-auto.RData")
+     file = "LiverThermal-02-networkConstruction-auto.RData")
 
 
 ### Correlate modules with traits of interest ###
-setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/LTREB_qtl/final_rqtl-run_14I2021/LTREB-WGCNA_st07_onehot_TT-brain/")
+
 # Load the expression and trait data saved in the first part
-lnames = load(file = "BrainThermalData-01-dataInput.RData");
+lnames = load(file = "LiverThermalData-01-dataInput.RData");
 lnames
 # Load network data saved in the second part
-lnames = load(file = "BrainThermal-02-networkConstruction-auto.RData");
+lnames = load(file = "LiverThermal-02-networkConstruction-auto.RData");
 lnames
 
 ## Get module eigenvalues and calculate correlation with each trait
@@ -304,7 +303,7 @@ MEs = orderMEs(MEs0)
 # if not using one-hot encoded traits
 moduleTraitCor = cor(MEs, cbind(datTraits$species,datTraits$temp), use = "p");
 # if using one-hot encoded traits
-moduleTraitCor = cor(MEs, cbind(datTraits$species_malxbirchF1,datTraits$species_Xbirch,datTraits$species_Xmal,datTraits$temp_33.5), use = "p");
+moduleTraitCor = cor(MEs, cbind(datTraits$species_malxbirchF1,datTraits$species_Xbirch,datTraits$species_Xmal,datTraits$temp_22.5,datTraits$temp_33.5), use = "p");
 #moduleTraitCor = cor(MEs, cbind(datTraits$temp_22.5,datTraits$temp_33.5), use = "p");
 
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
@@ -312,12 +311,12 @@ moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
 ## Display correlations and their p-values
 textMatrix =  paste(signif(moduleTraitCor, 2), sep = "");
 dim(textMatrix) = dim(moduleTraitCor)
-pdf(file='TT-brain-WGCNA_module-trait-heatmap.pdf',height=10,width=8)
+pdf(file='TT-liver-WGCNA_module-trait-heatmap.pdf',height=10,width=12)
 par(mar = c(6, 8.5, 3, 3))
 # Plot heatmap of ME-trait correlations
 hmcolors <- colorRampPalette(c("deepskyblue3", "white", "gold"))(n = 100)
 labeledHeatmap(Matrix = moduleTraitCor,
-               xLabels = c("malxbirchF1","Xbirch","Xmal","temp_33.5C"),
+               xLabels = names(datTraits),
                yLabels = names(MEs),
                ySymbols = names(MEs),
                colorLabels = FALSE,
@@ -338,15 +337,16 @@ subset(moduleTraitPvalue,moduleTraitPvalue[,1]<0.05) # f1
 subset(moduleTraitPvalue,moduleTraitPvalue[,2]<0.05) # xbirch
 subset(moduleTraitPvalue,moduleTraitPvalue[,3]<0.05) # xmal
 # Subset temp related modules:
-subset(moduleTraitPvalue,moduleTraitPvalue[,4]<0.05) #33.5c
+subset(moduleTraitPvalue,moduleTraitPvalue[,4]<0.05) #22.5c
+subset(moduleTraitPvalue,moduleTraitPvalue[,5]<0.05) #33.5c
 
 ## Output significant ME pvalues by trait
-colnames(moduleTraitPvalue) <- c("F1","xbirch","xmal","temp33.5")
-write.csv(moduleTraitPvalue,"TT-brain-WGCNA_MEtraitpvals.csv")
-write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,1]<0.05),"TT-brain-WGCNA_MEtraitpvals_sig-f1.csv",quote=F)
-write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,2]<0.05),"TT-brain-WGCNA_MEtraitpvals_sig-xbirch.csv",quote=F)
-write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,3]<0.05),"TT-brain-WGCNA_MEtraitpvals_sig-xmal.csv",quote=F)
-write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,4]<0.05),"TT-brain-WGCNA_MEtraitpvals_sig-temp.csv",quote=F)
+colnames(moduleTraitPvalue) <- c("F1","xbirch","xmal","temp22.5c","temp33.5")
+write.csv(moduleTraitPvalue,"TT-liver-WGCNA_MEtraitpvals.csv")
+write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,1]<0.05),"TT-liver-WGCNA_MEtraitpvals_sig-f1.csv")
+write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,2]<0.05),"TT-liver-WGCNA_MEtraitpvals_sig-xbirch.csv")
+write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,3]<0.05),"TT-liver-WGCNA_MEtraitpvals_sig-xmal.csv")
+write.csv(subset(moduleTraitPvalue,moduleTraitPvalue[,4]<0.05),"TT-liver-WGCNA_MEtraitpvals_sig-temp.csv")
 
 ## Plot heatmap for modules with at least one significant trait relationship
 sigmoduleTraitCor <- subset(moduleTraitCor,moduleTraitPvalue[,1] <0.05 | moduleTraitPvalue[,2] <0.05 | moduleTraitPvalue[,3] <0.05 | moduleTraitPvalue[,4] <0.05)
@@ -357,7 +357,7 @@ textMatrix =  paste(signif(sigmoduleTraitCor, 2), sep = "");
 dim(textMatrix) = dim(sigmoduleTraitCor)
 hmcolors <- colorRampPalette(c("deepskyblue3", "white", "gold"))(n = 100)
 # Plot heatmap
-pdf(file='TT-brain-WGCNA_module-trait-heatmap_sigMEs.pdf',height=7.5,width=5.5)
+pdf(file='TT-liver-WGCNA_module-trait-heatmap_sigMEs.pdf',height=7.5,width=5.5)
 par(mar = c(6, 8.5, 3, 3));
 labeledHeatmap(Matrix = sigmoduleTraitCor,
                xLabels = names(datTraits),
@@ -373,38 +373,13 @@ labeledHeatmap(Matrix = sigmoduleTraitCor,
                main = paste("Module-trait relationships"))
 dev.off()
 
-## Plot heatmap for temperature-associated modules
-sigmoduleTraitCor <- subset(moduleTraitCor,moduleTraitPvalue[,4] <0.05)
-sigmoduleTraitPvalue<- subset(moduleTraitPvalue,moduleTraitPvalue[,4] <0.05)
-sigMEs <-subset(names(MEs),moduleTraitPvalue[,4] <0.05)
-
-textMatrix =  paste(signif(sigmoduleTraitCor, 2), sep = "");
-dim(textMatrix) = dim(sigmoduleTraitCor)
-hmcolors <- colorRampPalette(c("deepskyblue3", "white", "gold"))(n = 100)
-# Plot heatmap
-pdf(file='TT-brain-WGCNA_module-trait-heatmap_sigTempMEs.pdf',height=3,width=5)
-par(mar = c(4, 9, 2, 1));
-labeledHeatmap(Matrix = sigmoduleTraitCor,
-               xLabels = c("F1","Xbirch","Xmal","temp33.5"),
-               yLabels = sigMEs,
-               ySymbols = sigMEs,
-               colorLabels = FALSE,
-               #               colors = blueWhiteRed(50),
-               colors = hmcolors,
-               textMatrix = textMatrix,
-               setStdMargins = FALSE,
-               cex.text = 0.6,
-               zlim = c(-1,1),
-               main = paste("Module-trait relationships"))
-dev.off()
-
 
 ###### Output module membership for all modules with significant trait relationship ######
 
 ### Get summary output for each significant module ###
 
 ## make outfiles for all significant modules, in bulk:
-header="TT-brain-WGCNA-onehot_"
+header="TT-liver-WGCNA-onehot_"
 for( MEname in sigMEs ) { 
   MEname <- substring(MEname, 3)
   print(MEname)
@@ -413,17 +388,18 @@ for( MEname in sigMEs ) {
 }
 
 # save sigMEs object for future use
-save(sigMEs, file = "TT-brain-WGCNA_sigMEs.RData") 
+save(sigMEs, file = "TT-liver-WGCNA_sigMEs.RData") 
 
 ## make outfiles for one module at a time:
-temp_MEsalmon<-names(datExpr)[moduleColors=="salmon"]
-write.csv(temp_MEsalmon,"BrainTT-temp_MEsalmon-0.78_genes.csv")
+#temp_MEsalmon<-names(datExpr)[moduleColors=="salmon"]
+#write.csv(temp_MEsalmon,"BrainTT-temp_MEsalmon-0.78_genes.csv")
 
 ### Plot correlation between module membership and trait ###
 
 ## get module membership and p values for each gene
 # simple Pearson's correlation
 # yields same results as datKME <- signedKME(datExpr, MEs, outputColumnName="MM.")
+modNames = substring(names(MEs), 3)
 geneModuleMembership = as.data.frame(cor(datExpr, MEs, use = "p"));
 MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples));
 names(geneModuleMembership) = paste("MM", modNames, sep="");
@@ -445,7 +421,7 @@ write.csv(geneTraitSignificance,paste0(header,"geneTraitSig-temp33.5.csv"))
 write.csv(GSPvalue,paste0(header,"geneTraitSig_pvals-temp33.5.csv"))
 
 # Plot module membership vs gene signficance for temp trait for individual modules
-module = "palevioletred3"
+module = "blue"
 column = match(module, modNames)
 moduleGenes = moduleColors==module
 par(mfrow = c(1,1))
@@ -455,20 +431,6 @@ verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
                    ylab = "Gene significance for temp",
                    main = paste("Module membership vs. gene significance\n"),
                    cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
-
-# Plot kWithin (intramodular) connectivity and gene-trait significance for significant modules
-colorlevels=unique(sigMEs)
-par(mfrow=c(2,as.integer(0.5+length(colorlevels)/2)))
-par(mar = c(4,5,3,1))
-for (i in c(1:length(colorlevels))){
-  whichmodule=colorlevels[[i]];
-  restrict1 = (sigMEs==whichmodule);
-  verboseScatterplot(Alldegrees1$kWithin[restrict1],
-                     geneTraitSignificance$temp33.5[restrict1], col=sigMEs[restrict1],
-                     main=whichmodule,
-                     xlab = "Connectivity", ylab = "Gene Significance", abline = TRUE)
-}
-
 
 
 ## For species: 
@@ -489,7 +451,7 @@ module = "blue"
 column = match(module, modNames)
 moduleGenes = moduleColors==module
 
-pdf(file='TT-brain-WGCNA_0.95-palevioletred3_cor-plot.pdf',height=5,width=5)
+pdf(file='TT-brain-WGCNA_0.95-blue-plot.pdf',height=5,width=5)
 par(mfrow = c(1,1))
 # XXX change the geneTraitSignificance column to be plotted
 verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
@@ -507,7 +469,7 @@ dev.off()
 chooseTopHubInEachModule(datExpr,colorh="MEsalmon") # ENSXMAG00000011516
 
 ## Identify genes with high significance and high intramodular connectivity in a module (i.e. hub genes)
-hub.genes = abs(geneTraitSignificance$GS.f1)> 0.2 & abs(geneModuleMembership$MEsalmon)> 0.85
+hub.genes = abs(geneTraitSignificance$GS.f1)< 0.2 & abs(geneModuleMembership$MEsalmon)> 0.85
 table(hub.genes)
 dimnames(data.frame(datExpr))[[2]][hub.genes]
 
@@ -519,6 +481,20 @@ head(connectivity_data) # Higher values = more connectivity
 dim(connectivity_data)
 write.csv(connectivity_data,paste(header,"intramod-connectivity_genes.csv"))
 
+# Plot kWithin (intramodular) connectivity and gene-trait significance for significant modules
+colorlevels=unique(sigMEs)
+par(mfrow=c(2,as.integer(0.5+length(colorlevels)/2)))
+par(mar = c(4,4,3,1))
+for (i in c(1:length(colorlevels))){
+  whichmodule=colorlevels[[i]];
+  colorname = substring(whichmodule, 3)
+  restrict1 = (sigMEs==whichmodule);
+  verboseScatterplot(connectivity_data$kWithin[restrict1],
+                     geneTraitSignificance$GS.temp33.5[restrict1], col=colorname,
+                     main=whichmodule,
+                     xlab = "Connectivity", ylab = "Gene Significance", abline = TRUE)
+}
+
 ## Get hub genes
 # Two methods were used by Morgan et al 2020 to define hub genes:
 #   1. any gene with module membership >= 0.85 (correlation between expression of gene and the module eigenvalue, Horvath & Dong 2008)
@@ -528,31 +504,32 @@ write.csv(connectivity_data,paste(header,"intramod-connectivity_genes.csv"))
 #       use intramodular connectivity (kIN -- high module membership usually means high kIN
 
 ## kTotal (connectivity with all genes) and kWithin (connectivity with genes within module) quantiles have same number (as expected) but with some overlapping, some different members
-kTotal_q0.99 <- subset(connectivity_data,connectivity_data$kTotal>quantile(connectivity_data$kTotal,0.99)) #190
-kWithin_q0.99 <-subset(connectivity_data,connectivity_data$kWithin>quantile(connectivity_data$kWithin,0.99)) #190
-kTotal_q0.95 <- subset(connectivity_data,connectivity_data$kTotal>quantile(connectivity_data$kTotal,0.95)) #946
-kWithin_q0.95 <-subset(connectivity_data,connectivity_data$kWithin>quantile(connectivity_data$kWithin,0.95)) #946
+kTotal_q0.99 <- subset(connectivity_data,connectivity_data$kTotal>quantile(connectivity_data$kTotal,0.99)) #183
+kWithin_q0.99 <-subset(connectivity_data,connectivity_data$kWithin>quantile(connectivity_data$kWithin,0.99)) #183
+kTotal_q0.95 <- subset(connectivity_data,connectivity_data$kTotal>quantile(connectivity_data$kTotal,0.95)) #914
+kWithin_q0.95 <-subset(connectivity_data,connectivity_data$kWithin>quantile(connectivity_data$kWithin,0.95)) #914
 
 #highconnectivity<-subset(row.names(connectivity_data),connectivity_data$kDiff>quantile(connectivity_data$kDiff,0.99))
 #subset(Alldegrees1,rownames(Alldegrees1)=="ENSXMAG00000000428")
 
 ## Subset all genes with module membership values of +/-0.9 or greater
-MM0.9 <- geneModuleMembership[rowSums(abs(geneModuleMembership) >= 0.9) >= 1, ] # 1036
-MM0.85 <- geneModuleMembership[rowSums(abs(geneModuleMembership) >= 0.85) >= 1, ] # 2778
+MM0.9 <- geneModuleMembership[rowSums(abs(geneModuleMembership) >= 0.9) >= 1, ] # 1452
+MM0.85 <- geneModuleMembership[rowSums(abs(geneModuleMembership) >= 0.85) >= 1, ] # 3131
 
 ## Designate hub genes as genes in both kTotal_q0.95 and MM0.9 subsets
-hub.genes <- intersect(row.names(kTotal_q0.95),row.names(MM0.9)) # 311
-hub.genes <- intersect(row.names(kWithin_q0.95),row.names(MM0.9)) # 228
-hub.genes <- intersect(row.names(kTotal_q0.95),row.names(MM0.85)) # 705
+hub.genes <- intersect(row.names(kTotal_q0.95),row.names(MM0.9)) # 323
+hub.genes <- intersect(row.names(kWithin_q0.95),row.names(MM0.9)) # 341
+hub.genes <- intersect(row.names(kTotal_q0.95),row.names(MM0.85)) # 639
 write.csv(connectivity_data[hub.genes,],paste0(header,"hubgenes_kTotal0.95_MM0.85.csv"))
-hub.genes <- intersect(row.names(kWithin_q0.95),row.names(MM0.85)) # 600
+hub.genes <- intersect(row.names(kWithin_q0.95),row.names(MM0.85)) # 607
 write.csv(connectivity_data[hub.genes,],paste0(header,"hubgenes_kWithin0.95_MM0.85.csv"))
 
 #hub.genes <- row.names(kWithin_q0.95)
 
 ## Identify which hub genes are found in modules of interest
-MEsalmon_genes<-names(datExpr)[moduleColors=="salmon"]
-intersect(hub.genes,MEsalmon_genes)
-MEgrey60_genes<-names(datExpr)[moduleColors=="grey60"]
-intersect(hub.genes,MEgrey60_genes)
+MEblue_genes<-names(datExpr)[moduleColors=="blue"]
+intersect(hub.genes,MEblue_genes)
+MEdarkgrey_genes<-names(datExpr)[moduleColors=="darkgrey"]
+intersect(hub.genes,MEdarkgrey_genes)
 greenyellowConn<-subset(hub.genes,X %in% MEgreenyellow_genes$x)
+

@@ -1,20 +1,20 @@
-### Adapted from Morgan et al 2020
-### Permutations 
-### - are hub genes more or less likely to be misexpressed?
-### - how many misexpressed genes are expected per module? which modules have more or less than expected misexpressed genes?
-
-## For each simulation, we randomly sampled the full set of genes in the RNAseq data 
-## and counted the number of sampled genes that were misexpressed. 
-## Then we determine whether the real number of misexpressed hub genes lies 
-## outside of the 95% quantiles of the normal distribution.
+## WGCNA-hub-misexp-permutation_TT-liver.R
+##
+## This script is broken up into the following functions:
+## Permute the expected number of hub genes that are transgressive/misexpressed in F1s
+## Permute the expected number of transgressive/misexpressed genes in F1s per module
+## Permute the expected number of hub genes per module 
+##
+## Contains code adapted from 
+## Morgan et al 2020: https://doi.org/10.1093/molbev/msaa002
+##
+## cyp I-2022
 
 library(dplyr)
 
-setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/LTREB_qtl/final_rqtl-run_14I2021/LTREB-WGCNA_st07_onehot_TT-brain/")
-
 ## Check overlap between kTotal and kWithin-filtered hub gene sets
-hub.genes_kTotal<-read.csv('TT-brain-WGCNA-onehot_hubgenes_kTotal0.95_MM0.85.csv',header=T,sep=',') # using 0.95q kTotal: 705 hub genes 
-hub.genes_kWithin<-read.csv('TT-brain-WGCNA-onehot_hubgenes_kWithin0.95_MM0.85.csv',header=T,sep=',') # using 0.95q kWithin: 600 hub genes 
+hub.genes_kTotal<-read.csv('input_files/TT-brain-WGCNA-onehot_hubgenes_kTotal0.95_MM0.85.csv',header=T,sep=',') # using 0.95q kTotal: 705 hub genes 
+hub.genes_kWithin<-read.csv('input_files/TT-brain-WGCNA-onehot_hubgenes_kWithin0.95_MM0.85.csv',header=T,sep=',') # using 0.95q kWithin: 600 hub genes 
 nrow(subset(hub.genes_kTotal, X %in% hub.genes_kWithin$X)) # 517 genes overlap between these hub gene sets
 
 # use kWithin-filtered hub genes for further analysis
@@ -23,7 +23,7 @@ num_hub_genes <- length(hub.genes) # 600
 
 ## First determine how many hub genes are transgressive (low, high, both) at 22C
 ## 15
-allgenes22C<-read.csv("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/dge/brain_w-mito/transgressive-exp_GO-results/TT-brain-22c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
+allgenes22C<-read.csv("input_files/TT-brain-22c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
 trans.both<-subset(allgenes22C,subset=F1_transgress.high=="1"|F1_transgress.low=="1") #225
 trans.both_hubgenes<-subset(subset(allgenes22C,subset=F1_transgress.high=="1"|F1_transgress.low=="1"), Gene %in% hub.genes) #15
 trans.low_hubgenes<-subset(subset(allgenes22C,subset=F1_transgress.low=="1"), Gene %in% hub.genes) #12
@@ -31,7 +31,7 @@ trans.high_hubgenes<-subset(subset(allgenes22C,subset=F1_transgress.high=="1"), 
 
 ## Determine how many hub genes are transgressive (low, high, both) at 33C
 ## NONE
-allgenes33C<-read.csv("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/dge/brain_w-mito/transgressive-exp_GO-results/TT-brain-33c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
+allgenes33C<-read.csv("input_files/TT-brain-33c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
 trans.both<-subset(allgenes33C,subset=F1_transgress.high=="1"|F1_transgress.low=="1") #83
 trans.both_hubgenes<-subset(subset(allgenes33C,subset=F1_transgress.high=="1"|F1_transgress.low=="1"), Gene %in% hub.genes) #0
 trans.low_hubgenes<-subset(subset(allgenes33C,subset=F1_transgress.low=="1"), Gene %in% hub.genes) #0
@@ -95,9 +95,8 @@ quantile(allGenes_withinTransgressive,probs=c(0.025,0.975))
 
 ### WGCNA module permutations
 # load all of the significant module names (sigMEs object)
-load(file = "TT-brain-WGCNA_sigMEs.RData")
+load(file = "input_files/TT-brain-WGCNA_sigMEs.RData")
 sigMEs
-
 
 ### Permutations: How many transgressive genes do we expect in each module?
 header="TT-brain-WGCNA-onehot_"

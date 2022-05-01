@@ -1,20 +1,22 @@
-### Adapted from Morgan et al 2020
-### Permutations - are hub genes more likely to lie in 
-
-## Random sample the full list of hub genes, each time counting the number of sampled
-## genes that fall within a module. 
-## Then determine whether the real number of hub genes within the module lies 
-## outside of the 95% quantiles of the normal distribution.
+## WGCNA-hub-misexp-permutation_TT-liver.R
+##
+## This script is broken up into the following functions:
+## Permute the expected number of hub genes that are transgressive/misexpressed in F1s
+## Permute the expected number of transgressive/misexpressed genes in F1s per module
+## Permute the expected number of hub genes per module 
+##
+## Contains code adapted from 
+## Morgan et al 2020: https://doi.org/10.1093/molbev/msaa002
+##
+## cyp I-2022
 
 library(dplyr)
 
-setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/LTREB_qtl/final_rqtl-run_14I2021/LTREB-WGCNA_st12_onehot_TT-liver/")
-
 ## Determine how many hub genes are transgressive (low, high, both) at 22C
 ## NONE
-geneset22c<-read.csv("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/dge/liver_w-mito/TT-liver-22c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
-hub.genes_Kwithin<-read.csv('TT-liver-WGCNA-onehot_hubgenes_kWithin0.95_MM0.85.csv',header=T,sep=',') # 607
-hub.genes_KTotal<-read.csv('TT-liver-WGCNA-onehot_hubgenes_kTotal0.95_MM0.85.csv',header=T,sep=',') # 639
+geneset22c<-read.csv("input_files/TT-liver-22c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
+hub.genes_Kwithin<-read.csv('input_files/TT-liver-WGCNA-onehot_hubgenes_kWithin0.95_MM0.85.csv',header=T,sep=',') # 607
+hub.genes_KTotal<-read.csv('input_files/TT-liver-WGCNA-onehot_hubgenes_kTotal0.95_MM0.85.csv',header=T,sep=',') # 639
 hub.genes<-hub.genes_Kwithin$X
 num_hub_genes = length(hub.genes) # num hub genes using 0.95q cutoff
 
@@ -25,7 +27,7 @@ trans.high_hubgenes<-subset(subset(geneset22c,subset=F1_transgress.high=="1"), G
 
 ## Determine how many hub genes are transgressive (low, high, both) at 33C
 ## NONE
-geneset33c<-read.csv("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/dge/liver_w-mito/TT-liver-33c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
+geneset33c<-read.csv("input_files/TT-liver-33c-w-mito_DGE_lfc-shr_all.csv_with-annots.csv_with-F1info.csv",h=T,sep=",")
 trans.both<-subset(geneset33c,subset=F1_transgress.high=="1"|F1_transgress.low=="1") #25
 trans.both_hubgenes<-subset(subset(geneset33c,subset=F1_transgress.high=="1"|F1_transgress.low=="1"), Gene %in% hub.genes) #0
 trans.low_hubgenes<-subset(subset(geneset33c,subset=F1_transgress.low=="1"), Gene %in% hub.genes) #0
@@ -93,7 +95,7 @@ quantile(allGenes_withinTransgressive,probs=c(0.01,0.05,0.9,0.95,0.98))
 
 ### WGCNA module permutations
 # load all of the significant module names (sigMEs object)
-load(file = "TT-liver-WGCNA_sigMEs.RData")
+load(file = "input_files/TT-liver-WGCNA_sigMEs.RData")
 sigMEs
 
 ## Permutations - expected number of transgressive genes in a module
