@@ -1,11 +1,17 @@
-# Pipeline for mapping CTmax QTL 
+# QTL mapping 
 
-This is a cleaned pipeline for mapping QTL with both R/qtl and a general linear model (GLM). 
-This analysis is presented in Payne et al 2021, where we mapped the critical thermal 
-maximum (CTmax) of ~150 Xiphophorus malinche-X. birchmanni F2 hybrids. Below is a
-summary of the included scripts.
+This is a clean pipeline for mapping QTL with both R/qtl and a general linear model (GLM). 
+This analysis is presented in Payne et al 2022, where we mapped the critical thermal 
+maximum (CTmax) of ~150 Xiphophorus malinche-X. birchmanni artificial F2 hybrids.
 
-All infiles used to run the following scripts. 
+All input files used in the following analysis can be found in input_files/ .
+
+## Dependencies
+
+R-3.6.1
+
+The following packages are required for each anlaysis (see install.R):
+* QTL-mapping ~ qtl
 
 ## Contents
 
@@ -19,18 +25,15 @@ All infiles used to run the following scripts.
   * *Description: Perform admixture mapping (with GLM), where genotype is encoded
                   as a numeric variable.* 
 
-
 * **perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov_categorical-geno.R** 
 
   * *Description: Perform admixture mapping (with GLM), where genotype is encoded
                   as a categorical variable.*
 
-
 * **perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov_categorical-geno_NULL.R**
   
   * *Description: Perform null simulations of admixture mapping (categorical genotype) to
                   get permuted 5% p-value GLM threshold.*
-
 
 * **CTmax-GLM-analysis_clean.R**
 
@@ -40,7 +43,7 @@ All infiles used to run the following scripts.
 
   * *Description: Approximate Bayesian Computation approach to estimate the
                   range of effect sizes that may be explained by the QTL.*
-                   
+
 * **power-simulations_LTREB-qtl_17-1hot-site-tanks.py** 
 
   * *Description: Perform power simulations to determine the likelihood of recovering a 
