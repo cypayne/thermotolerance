@@ -1,0 +1,13 @@
+{
+	"n_targets": 24475,
+	"n_bootstraps": 0,
+	"n_processed": 24537604,
+	"n_pseudoaligned": 10627139,
+	"n_unique": 10441843,
+	"p_pseudoaligned": 43.3,
+	"p_unique": 42.6,
+	"kallisto_version": "0.44.0",
+	"index_version": 10,
+	"start_time": "Wed Feb 10 17:26:42 2021",
+	"call": "/home/users/cypayne/miniconda3/envs/TTev/bin/kallisto quant -i xbirchmanni_10x_inferred_transcriptome.idx -o S68_TSR3-33C-malxbirchF1-brain_21-E9_kallisto ./rnaseq_reads/S68_TSR3-33C-malxbirchF1-brain_21-E9_R1_val_1.fq.gz ./rnaseq_reads/S68_TSR3-33C-malxbirchF1-brain_21-E9_R2_val_2.fq.gz"
+}

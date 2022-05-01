@@ -1,0 +1,13 @@
+{
+	"n_targets": 24475,
+	"n_bootstraps": 0,
+	"n_processed": 28196287,
+	"n_pseudoaligned": 19810657,
+	"n_unique": 19504810,
+	"p_pseudoaligned": 70.3,
+	"p_unique": 69.2,
+	"kallisto_version": "0.44.0",
+	"index_version": 10,
+	"start_time": "Wed Feb 10 17:20:08 2021",
+	"call": "/home/users/cypayne/miniconda3/envs/TTev/bin/kallisto quant -i xbirchmanni_10x_inferred_transcriptome.idx -o S67_TSR3-33C-Xbirch-liver_20-D9_kallisto ./rnaseq_reads/S67_TSR3-33C-Xbirch-liver_20-D9_R1_val_1.fq.gz ./rnaseq_reads/S67_TSR3-33C-Xbirch-liver_20-D9_R2_val_2.fq.gz"
+}

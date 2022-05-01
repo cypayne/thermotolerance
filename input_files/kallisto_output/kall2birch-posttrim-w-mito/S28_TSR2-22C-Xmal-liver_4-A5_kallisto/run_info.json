@@ -1,0 +1,13 @@
+{
+	"n_targets": 19249,
+	"n_bootstraps": 0,
+	"n_processed": 21543449,
+	"n_pseudoaligned": 15114019,
+	"n_unique": 15037736,
+	"p_pseudoaligned": 70.2,
+	"p_unique": 69.8,
+	"kallisto_version": "0.44.0",
+	"index_version": 10,
+	"start_time": "Sat Apr 18 13:29:45 2020",
+	"call": "/home/users/cypayne/miniconda3/envs/TTev/bin/kallisto quant -i ../kallisto-idx/xbir_allhaps_ref_with-xbir-mito.transcripts.idx -o S28_TSR2-22C-Xmal-liver_4-A5_kallisto rnaseq_reads/S28_TSR2-22C-Xmal-liver_4-A5_R1_val_1.fq.gz rnaseq_reads/S28_TSR2-22C-Xmal-liver_4-A5_R2_val_2.fq.gz"
+}

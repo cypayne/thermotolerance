@@ -1,0 +1,13 @@
+{
+	"n_targets": 24475,
+	"n_bootstraps": 0,
+	"n_processed": 22400925,
+	"n_pseudoaligned": 8857281,
+	"n_unique": 8711128,
+	"p_pseudoaligned": 39.5,
+	"p_unique": 38.9,
+	"kallisto_version": "0.44.0",
+	"index_version": 10,
+	"start_time": "Wed Feb 10 17:28:52 2021",
+	"call": "/home/users/cypayne/miniconda3/envs/TTev/bin/kallisto quant -i xbirchmanni_10x_inferred_transcriptome.idx -o S1_TSR1-22C-Xmal-brain_1-A1_kallisto ./rnaseq_reads/S1_TSR1-22C-Xmal-brain_1-A1_R1_val_1.fq.gz ./rnaseq_reads/S1_TSR1-22C-Xmal-brain_1-A1_R2_val_2.fq.gz"
+}

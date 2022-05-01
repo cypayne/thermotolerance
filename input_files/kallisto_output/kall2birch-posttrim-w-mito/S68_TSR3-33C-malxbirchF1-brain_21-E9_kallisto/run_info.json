@@ -1,0 +1,13 @@
+{
+	"n_targets": 19249,
+	"n_bootstraps": 0,
+	"n_processed": 24537604,
+	"n_pseudoaligned": 14192591,
+	"n_unique": 14079154,
+	"p_pseudoaligned": 57.8,
+	"p_unique": 57.4,
+	"kallisto_version": "0.44.0",
+	"index_version": 10,
+	"start_time": "Sat Apr 18 15:40:46 2020",
+	"call": "/home/users/cypayne/miniconda3/envs/TTev/bin/kallisto quant -i ../kallisto-idx/xbir_allhaps_ref_with-xbir-mito.transcripts.idx -o S68_TSR3-33C-malxbirchF1-brain_21-E9_kallisto rnaseq_reads/S68_TSR3-33C-malxbirchF1-brain_21-E9_R1_val_1.fq.gz rnaseq_reads/S68_TSR3-33C-malxbirchF1-brain_21-E9_R2_val_2.fq.gz"
+}
