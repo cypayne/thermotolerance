@@ -1,6 +1,7 @@
 ### CTmax-Rqtl-analysis_clean.R
 #
-# Script used to map CTmax QTL in Payne et al 2021
+# Script used to map CTmax QTL in Payne et al 2022
+# See Figure 2
 #
 # Input file:
 #   Rqtl format csv file, containing phenotype columns
@@ -19,15 +20,11 @@
 ## load library
 library(qtl)
 
-setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/LTREB_qtl/CTmax-QTL_first-scan_data")
-
 ###### LOAD DATA ######
 
 ## load rqtl infile (csv) = 30244 (20k bp thinned) markers, 152 individuals, 31 phenotypes
 # for the 1st QTL scan
-data<-read.cross("csv",dir="","LTREB-CTmax-oct2020-ONLY_20k-thinned-genos_no-xtrm-hi_22onehot-site-tanks.rqtl.csv", na.strings=c("NA"),estimate.map=FALSE)
-# for the 2nd QTL scan
-# data<-read.cross("csv",dir="","LTREB-CTmax-oct2020-ONLY_20k-thinned-genos_no-xtrm-hi_22onehot-site-tanks_ScyDAA6-2113-HRSCAF-2539.8811359-onehot.rqtl.csv", na.strings=c("NA"),estimate.map=FALSE)
+data<-read.cross("csv",dir="Scripts/input_files","LTREB-CTmax-oct2020-ONLY_20k-thinned-genos_no-xtrm-hi_22onehot-site-tanks.rqtl.csv", na.strings=c("NA"),estimate.map=FALSE)
 
 # check that cross type, # individuals, and # markers are correct
 # 30244 (20k bp thinned) markers, 152 individuals, 31 phenotypes
@@ -106,16 +103,12 @@ data_sub.ds <- est.rf(data_sub.ds)
 ## load est.rf results after running on cluster/server
 # 1st scan
 data_sub.ds <- readRDS(file = "./ltreb-qtl-data_sub.ds-est.rf.rds")
-# 2nd scan
-#data_sub.ds <- readRDS(file = "./ltreb-qtl-data_sub.ds-est.rf_second-scan-w-qtl-covariate.rds")
 
 ## calculate conditional genotype probabilities given multipoint marker data
 data_prob <- calc.genoprob(data_sub.ds)
 
 # 1st scan
 write.cross(data_prob,file="ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob.csv")
-# 2nd scan
-#write.cross(data_prob,file="ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob_second-scan-w-qtl-covariate.csv")
 
 saveRDS(data_prob,file="ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob.rds")
 
@@ -213,9 +206,6 @@ summary(perm.hk,alpha=c(0.05, 0.1, 0.2))
 #20% 3.95
 cutoff_lod = 4.33
 
-## 2nd scan: ctmax ~ hi + sig.site.tanks + g22_qtl_genos
-#cutoff_lod = 4.37
-
 ## look at highest LOD peak and the corresponding p-value on each chromosome
 summary(scanone.hk, perms=perm.hk, pvalues=TRUE)
 
@@ -233,13 +223,6 @@ plot(scanone.hk,chr="ScyDAA6-2113-HRSCAF-2539") # chr22
 abline(h=cutoff_lod, col="red", lwd=3)
 title("22@8.81")
 dev.off()
-
-# 2nd scan: chr15 interacting peak
-#chr  pos lod
-#ScyDAA6-5984-HRSCAF-6694:5847498 ScyDAA6-5984-HRSCAF-6694 5.85 3.5
-plot(scanone.hk,chr="ScyDAA6-5984-HRSCAF-6694") # chr15
-abline(h=cutoff_lod, col="red", lwd=3)
-title("15@5.85")
 
 
 ###### LOD peak support ######
@@ -321,12 +304,6 @@ mtext(c("MM","MB","BB"),at=1:3,side=1)
 
 dev.off()
 
-## plot the joint effects of the chr22 QTL and chr15 peak
-pdf("ltreb-only-CTmax_17-1hot-site-tanks_chr22-qtl-chr15-peak-interaction-plot.pdf",5.5,7)
-effectplot(data_sim, mname2="ScyDAA6-2113-HRSCAF-2539@8.81", mname1="ScyDAA6-5984-HRSCAF-6694@4.41", geno1=c("MM","MB","BB"), geno2=c("MM","MB","BB"), var.flag = "group", main = "15@4.41 x 22@8.81", xlab = "Genotype at chr22 QTL", ylab = expression('CT'['max']*' ('*~degree*C*')'), col = effect_colors, add.legend = TRUE, legend.lab = "chr15 QTL")
-dev.off()
-
-
 
 ### other effect plots
 ## Load data_prob object
@@ -353,32 +330,7 @@ pdf("ltreb-only-CTmax_17-1hot-site-tanks_chr22-qtl-effect-plot-w-points.pdf",5.5
 plotPXG(data_prob,marker=mar_chr22,main='22@8.81',infer=FALSE, ylab = expression('CT'['max']*' ('*~degree*C*')'), col = effect_colors)
 dev.off()
 
-# 2nd scan
-mar_chr15 <- find.marker(data_prob, chr='ScyDAA6-5984-HRSCAF-6694', pos=4.4)
-plotPXG(data_prob,marker=mar_chr15,main='15@5.85')
-effectplot(data_sim,mname1=mar_chr15,main='15@4.41')
-# simple effect plot and effect plot with points
-pdf("ltreb-only-CTmax_17-1hot-site-tanks_chr15-qtl-effect-plot_and_w-points.pdf",8.5,6)
-par(mfrow=c(1,2))
-effectplot(data_sim,mname1=mar_chr15,main='15@4.41', xlab = "Genotype", ylab = expression('CT'['max']*' ('*~degree*C*')'))
-plotPXG(data_prob,marker=mar_chr15,main='15@4.41',infer=FALSE, ylab = expression('CT'['max']*' ('*~degree*C*')'), col = effect_colors)
-
-dev.off()
-
-
-## plot the joint effects of the chr22 QTL and chr15 peak
-pdf("ltreb-only-CTmax_17-1hot-site-tanks_chr22-qtl-chr15-peak-interaction-plot.pdf",5.5,7)
-effectplot(data_sim, mname2="ScyDAA6-2113-HRSCAF-2539@8.81", mname1="ScyDAA6-5984-HRSCAF-6694@4.41", geno1=c("MM","MB","BB"), geno2=c("MM","MB","BB"), var.flag = "group", main = "15@4.41 x 22@8.81", xlab = "Genotype at chr22 QTL", ylab = expression('CT'['max']*' ('*~degree*C*')'), col = effect_colors, add.legend = TRUE, legend.lab = "chr15 QTL")
-dev.off()
-
-pdf("ltreb-only-CTmax_17-1hot-site-tanks_chr22-qtl-chr15-peak-interaction-plot-w-points.pdf",9.8,8.2)
-plotPXG(data_prob, marker=c(mar_chr22, mar_chr15))
-dev.off()
-
-# to get vals
-# g15 interactor
-# additive: 0.2425
-# dominance: -0.2835
+## get QTL effect on CTmax per genotype at peak
 eff <- effectplot(data_sim,mname1=mar_chr22)
 eff
 # ScyDAA6-2113-HRSCAF-2539:8811359
@@ -452,11 +404,11 @@ write.csv(out.aq_2qtl[out.aq_2qtl$chr == "ScyDAA6-1854-HRSCAF-2213" & out.aq_2qt
 lod_cutoff = 3.36-1.5
 write.csv(out.aq_2qtl[out.aq_2qtl$chr == "ScyDAA6-2469-HRSCAF-2980" & out.aq_2qtl$lod > lod_cutoff,], "CTmax-chr22-chr15-add-qtl_ScyDAA6-1854-HRSCAF-2213_1.5LOD.csv")
 
+
 ###### ROUGHLY ESTIMATE EFFECT OF QTL WITH AN LM ######
 
 ### get a very rough estimate of the QTL effect size with R^2
 ## load infile as data.frame and do correlations/lm with that
-setwd("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Data/LTREB_qtl/CTmax-QTL_first-scan_data")
 data_prob.df <- read.csv("ltreb-ctmax-qtl-filtered_22-1hot-site-tank_data-prob.csv")
 
 ## grab all relevant variables
@@ -634,7 +586,7 @@ TukeyHSD(x=anov, 'chr22_geno:chr15_geno', conf.level=0.95)
 scanone.hk.df_rename <- read.csv("ltreb-only-CTmax_17-1hot-site-tanks.scanone-hk_clean.tsv_chr-renamed.csv")
 
 ## load the qqman manhattan plot function
-source("~/Box/Schumer_lab_resources/Project_files/Thermal_tolerance_projects/Scripts/adapted_qqman.R")
+source("Scripts/input_files/adapted_qqman.R")
 
 ## Function: prepares data frame with chr,pos,lod columns to create manhattan plot
 #  make sure 'cutoff_lod' is set to the LOD threshold

@@ -1,24 +1,26 @@
-##  Perform admixture mapping with a genotypes file, a hybrid index file, 
-##  a phenotypes file, a column number for the focal phenotype of interest, 
+## perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov.R
+#
+##  Perform admixture mapping with a genotypes file, a hybrid index file,
+##  a phenotypes file, a column number for the focal phenotype of interest,
 ##  a start column index marking where covariate columns start, an end column
-##  index marking where covariate columns end, and an outfile name tag to 
+##  index marking where covariate columns end, and an outfile name tag to
 ##  be appended to the outfile name
 ##  NOTE: sample order *must* be identical across files
-##  This code is similar to that in perform_glm_admixture_mapping_v2_gaussian.R, 
+##  This code is similar to that in perform_glm_admixture_mapping_v2_gaussian.R,
 ##  but with additional covariates
 
-### WARNING: This script was written for a specific case and has hardcoded elements, 
+### WARNING: This script was written for a specific case and has hardcoded elements,
 ###          needs to be edited if not using 17 site-tank covariates
 
 ### Model codes genotype as a numeric variable
 ### usage: Rscript perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov.R
-###                genotypes_file hybrid_index_file phenotypes_file focal_column_number 
+###                genotypes_file hybrid_index_file phenotypes_file focal_column_number
 ###                covar_column_start_number covar_column_end_number name_tag
 
 ### ms & cyp 06/2020
 
 # To get helpful output for debugging, set to TRUE
-DEBUG = FALSE 
+DEBUG = FALSE
 
 # Check that correct number of arguments are passed
 args <- commandArgs(TRUE)
@@ -49,14 +51,14 @@ for (x in 2:length(data[1,])){
   dat<-cbind(phenotypes[,pheno_column],index$hybrid_index,phenotypes[,covar_start_column:covar_end_column],data[,x])
   last_index<-length(dat)
 
-  # omit individuals with NAs 
+  # omit individuals with NAs
   dat<-na.omit(dat)
 
   # helpful for debugging
   if(DEBUG) {
-    if(x==2) { 
+    if(x==2) {
       print(head(dat))
-      print(dim(dat)) 
+      print(dim(dat))
     }
 
   # remove marker if less than 1/2 of the individuals are genotyped
@@ -64,12 +66,12 @@ for (x in 2:length(data[1,])){
 
     # run null model (i.e. pheno~index+covariates)
     potentialError<- tryCatch(
-      model2<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) + 
-                as.factor(dat[,4]) + as.factor(dat[,5]) + as.factor(dat[,6]) + 
-                as.factor(dat[,7]) + as.factor(dat[,8]) + as.factor(dat[,9]) + 
-                as.factor(dat[,10]) + as.factor(dat[,11]) + as.factor(dat[,12]) + 
-                as.factor(dat[,13]) + as.factor(dat[,14]) + as.factor(dat[,15]) + 
-                as.factor(dat[,16]) + as.factor(dat[,17]) + as.factor(dat[,18]) + 
+      model2<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) +
+                as.factor(dat[,4]) + as.factor(dat[,5]) + as.factor(dat[,6]) +
+                as.factor(dat[,7]) + as.factor(dat[,8]) + as.factor(dat[,9]) +
+                as.factor(dat[,10]) + as.factor(dat[,11]) + as.factor(dat[,12]) +
+                as.factor(dat[,13]) + as.factor(dat[,14]) + as.factor(dat[,15]) +
+                as.factor(dat[,16]) + as.factor(dat[,17]) + as.factor(dat[,18]) +
                 as.factor(dat[,19]), family="gaussian"), error=function(e) e )
 
     if(inherits(potentialError, "error")) {
@@ -78,16 +80,16 @@ for (x in 2:length(data[1,])){
     }
 
     null<-logLik(model2)[1]
-    
+
     # run full model (i.e. pheno~index+covariates+genotype
     # genotype coded as numeric here
-    model1<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) + 
+    model1<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) +
                 as.factor(dat[,4]) + as.factor(dat[,5]) +
-                as.factor(dat[,6]) + as.factor(dat[,7]) + as.factor(dat[,8]) + 
+                as.factor(dat[,6]) + as.factor(dat[,7]) + as.factor(dat[,8]) +
                 as.factor(dat[,9]) + as.factor(dat[,10]) +
-                as.factor(dat[,11]) + as.factor(dat[,12]) + as.factor(dat[,13]) + 
+                as.factor(dat[,11]) + as.factor(dat[,12]) + as.factor(dat[,13]) +
                 as.factor(dat[,14]) + as.factor(dat[,15]) +
-                as.numeric(dat[,16]) + as.factor(dat[,17]) + as.factor(dat[,18]) + 
+                as.numeric(dat[,16]) + as.factor(dat[,17]) + as.factor(dat[,18]) +
                 as.factor(dat[,19]) + as.numeric(dat[,20]),family="gaussian")
 
     focal<-logLik(model1)[1]

@@ -5,6 +5,8 @@ This analysis is presented in Payne et al 2021, where we mapped the critical the
 maximum (CTmax) of ~150 Xiphophorus malinche-X. birchmanni F2 hybrids. Below is a
 summary of the included scripts.
 
+All infiles used to run the following scripts. 
+
 ## Contents
 
 * **CTmax-Rqtl-analysis_clean.R**
@@ -27,13 +29,17 @@ summary of the included scripts.
 * **perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov_categorical-geno_NULL.R**
   
   * *Description: Perform null simulations of admixture mapping (categorical genotype) to
-                 get permuted 5% p-value GLM threshold.*
+                  get permuted 5% p-value GLM threshold.*
 
 
 * **CTmax-GLM-analysis_clean.R**
 
   * *Description: Plot results of admixture mapping.* 
 
+* **ABC_simulations_for_effect_size.R**
+
+  * *Description: Approximate Bayesian Computation approach to estimate the
+                  range of effect sizes that may be explained by the QTL.*
                    
 * **power-simulations_LTREB-qtl_17-1hot-site-tanks.py** 
 

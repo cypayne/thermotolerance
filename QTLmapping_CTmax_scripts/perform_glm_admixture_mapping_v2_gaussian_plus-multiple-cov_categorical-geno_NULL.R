@@ -1,24 +1,26 @@
-##  Perform NULL admixture mapping with a genotypes file, a hybrid index file, 
-##  a phenotypes file, a column number for the focal phenotype of interest, 
+## perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov_categorical-geno_NULL.R
+#
+##  Perform NULL admixture mapping with a genotypes file, a hybrid index file,
+##  a phenotypes file, a column number for the focal phenotype of interest,
 ##  a start column index marking where covariate columns start, an end column
-##  index marking where covariate columns end, and an outfile name tag to 
+##  index marking where covariate columns end, and an outfile name tag to
 ##  be appended to the outfile name
 ##  NOTE: sample order *must* be identical across files
-##  This code is similar to that in perform_glm_admixture_mapping_v2_gaussian.R, 
+##  This code is similar to that in perform_glm_admixture_mapping_v2_gaussian.R,
 ##  but with additional covariates
 
-### WARNING: This script was written for a specific case and has hardcoded elements, 
+### WARNING: This script was written for a specific case and has hardcoded elements,
 ###          needs to be edited if not using 17 site-tank covariates
 
 ### NULL simulations for perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov.R
-### usage: Rscript perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov.R 
-###                genotypes_file hybrid_index_file phenotypes_file focal_column_number 
+### usage: Rscript perform_glm_admixture_mapping_v2_gaussian_plus-multiple-cov.R
+###                genotypes_file hybrid_index_file phenotypes_file focal_column_number
 ###                covar_column_start_number covar_column_end_number name_tag
 
 ### ms & cyp 06/2020
 
 # To get helpful output for debugging, set to TRUE
-DEBUG = FALSE 
+DEBUG = FALSE
 
 # Check that correct number of arguments are passed
 args <- commandArgs(TRUE)
@@ -44,7 +46,7 @@ for(y in 1:num_sims){
 
   names<-colnames(data)
   combined_phenos<-cbind(phenotypes[,pheno_column],phenotypes[,covar_start_column:covar_end_column])
-  combined_phenos_shuff<-combined_phenos[sample(nrow(combined_phenos),length(combined_phenos[,1])),] 
+  combined_phenos_shuff<-combined_phenos[sample(nrow(combined_phenos),length(combined_phenos[,1])),]
   null_phenos<-combined_phenos_shuff[,1]
   null_covars<-combined_phenos_shuff[,2:length(combined_phenos_shuff)]
 
@@ -64,7 +66,7 @@ for(y in 1:num_sims){
     dat<-cbind(null_phenos,phenotypes$hybrid_index,null_covars,data[,x])
     last_index<-length(dat)
 
-    # omit individuals with NAs 
+    # omit individuals with NAs
     dat<-na.omit(dat)
 
     # remove marker if less than 1/2 of the individuals are genotyped
@@ -74,12 +76,12 @@ for(y in 1:num_sims){
       # having an error issue here - contrasts error pops up for some
       # markers, not sure why - need to throw those out
       potentialError<- tryCatch(
-        model2<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) + 
+        model2<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) +
                   as.factor(dat[,4]) + as.factor(dat[,5]) +
-                  as.factor(dat[,6]) + as.factor(dat[,7]) + as.factor(dat[,8]) + 
+                  as.factor(dat[,6]) + as.factor(dat[,7]) + as.factor(dat[,8]) +
                   as.factor(dat[,9]) + as.factor(dat[,10]) +
-                  as.factor(dat[,11]) + as.factor(dat[,12]) + as.factor(dat[,13]) + 
-                  as.factor(dat[,14]) + as.factor(dat[,15]) + as.factor(dat[,16]) + 
+                  as.factor(dat[,11]) + as.factor(dat[,12]) + as.factor(dat[,13]) +
+                  as.factor(dat[,14]) + as.factor(dat[,15]) + as.factor(dat[,16]) +
                   as.factor(dat[,17]) + as.factor(dat[,18]) +
                   as.factor(dat[,19]),family="gaussian"), error=function(e) e )
 
@@ -92,12 +94,12 @@ for(y in 1:num_sims){
 
       # run full model (i.e. pheno~index+covariates+genotype
       # genotype coded as factor here
-      model1<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) + 
+      model1<-glm(as.numeric(dat[,1])~as.numeric(dat[,2]) + as.factor(dat[,3]) +
                   as.factor(dat[,4]) + as.factor(dat[,5]) +
-                  as.factor(dat[,6]) + as.factor(dat[,7]) + as.factor(dat[,8]) + 
+                  as.factor(dat[,6]) + as.factor(dat[,7]) + as.factor(dat[,8]) +
                   as.factor(dat[,9]) + as.factor(dat[,10]) +
-                  as.factor(dat[,11]) + as.factor(dat[,12]) + as.factor(dat[,13]) + 
-                  as.factor(dat[,14]) + as.factor(dat[,15]) + as.factor(dat[,16]) + 
+                  as.factor(dat[,11]) + as.factor(dat[,12]) + as.factor(dat[,13]) +
+                  as.factor(dat[,14]) + as.factor(dat[,15]) + as.factor(dat[,16]) +
                   as.factor(dat[,17]) + as.factor(dat[,18]) +
                   as.factor(dat[,19]) + as.factor(dat[,20]),family="gaussian")
 
@@ -113,7 +115,7 @@ for(y in 1:num_sims){
 
       # cat((summary(model1)$coef[,"t value"])[length(p_list)],"\n",like_diff,"\n")
 
-      # Write out results (one p-value per categorical genotype) 
+      # Write out results (one p-value per categorical genotype)
       if(track==0){
         write.table(results,file=out,append=TRUE,col.names=c("chrom.marker","intercept","mixture_prop","geno1_pval","geno2_pval","t-value","likelihood-diff","num_ind"),row.names=F,sep="\t",quote=FALSE)
         track=1
